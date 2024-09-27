@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'MPESA_CONSUMER_SECRET' => env('MPESA_CONSUMER_SECRET'),
+    'MPESA_CONSUMER_KEY' => env('MPESA_CONSUMER_KEY'),
+
 ];
