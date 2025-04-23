@@ -3,12 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\progress;
+use App\Models\training;
+use App\Models\purchase;
 
 class TrainingsController extends Controller
 {
     public function index(Request $request)
     {
         return response()->json(['message' => 'All Trainings']);
+    }
+    public function create(Request $request)
+    {
+        $training = Training::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'category' => $request->category,
+            'price' => $request->price,
+            'image' => $request->image,
+        ]);
+        return response()->json($training);
     }
     public function calendar(Request $request)
     {
