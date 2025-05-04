@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('modules', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId(column: 'training_id')->constrained('trainings');
-            $table->foreignId(column: 'trainer_id')->constrained('trainers');
+            $table->foreignId(column: 'training_id')->constrained('trainings')->onDelete('cascade');
+            $table->foreignId(column: 'trainer_id')->constrained('trainers')->onDelete('cascade');
             $table->string(column: 'title');
             $table->longText(column: 'description');
             $table->string(column: 'type');

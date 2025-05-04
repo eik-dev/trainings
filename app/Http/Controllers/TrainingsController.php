@@ -27,18 +27,32 @@ class TrainingsController extends Controller
 
     public function create(Request $request)
     {
-        $training = Training::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'category' => $request->category,
-            'reference_id' => $request->reference_id,
-            'start_date' => $request->start,
-            'end_date' => $request->end,
-        ]);
+        $training = Training::updateOrCreate(
+[
+                'title' => $request->title,
+            ],
+    [
+                'title' => $request->title,
+                'description' => $request->description,
+                'category' => $request->category,
+                'reference_id' => $request->reference_id,
+                'start_date' => $request->start,
+                'end_date' => $request->end,
+            ]
+        );
         return response()->json([
             'success' => true,
             'message' => 'Training created successfully',
             'data' => $training
+        ]);
+    }
+
+    public function update(Request $request, Training $training)
+    {
+        $training->update($request->all());
+        return response()->json([
+            'success' => true,
+            'message' => 'Training updated successfully',
         ]);
     }
 
@@ -161,46 +175,70 @@ class TrainingsController extends Controller
     }
     public function training(Training $training)
     {
+        $training = Training::with('pricing', 'media', 'modules.trainer')->find($training->id);
         return response()->json([
             'success' => true,
             'message' => 'Training fetched successfully',
             'data' => $training
         ]);
     }
-    public function info(Request $request)
+
+    public function checkTraining(Request $request)
     {
-        $training = [
-            'image'=>'/Training2.jpeg',
-            'name'=>'Thought Leadership Webinar Series',
-            'message'=>'Members 20% discount',
-            'category'=>'Business',
-            'price'=>27000,
-        ];
-        $data = [
-            'trainer'=>'Jane Doe',
-            'rating'=>4.5,
-            'reviews'=>38,
-            'media'=>[''],
-            'description'=>"Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed voluptate earum ut, aperiam consectetur exercitationem placeat corporis iure molestias? Accusantium at repellat neque officiis facilis assumenda eum repudiandae commodi dolorem! Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed voluptate earum ut, aperiam consectetur exercitationem placeat corporis iure molestias? Accusantium at repellat neque officiis facilis assumenda eum repudiandae commodi dolorem!",
-            'sessions'=>12,
-            'cost'=>[
-                [
-                    'type'=>"member",
-                    'amount'=>9600
-                ],
-                [
-                    'type'=>"student",
-                    'amount'=>10000
-                ],
-                [
-                    'type'=>"non-member",
-                    'amount'=>12000
-                ]
-            ],
-            'related'=>array_fill(0, 4, $training)
-        ];
-        return response()->json($data);
+        $training = Training::where('reference_id', $request->reference_id)->first();
+        return response()->json([
+            'success' => true,
+            'message' => 'Training fetched successfully',
+            'data' => $training
+        ]);
     }
+    
+    public function listTrainings(Request $request)
+    {
+        $query = Training::with('pricing', 'media', 'modules.trainer')->where('draft', false);
+        
+        if ($request->has('filter') && $request->filter === 'upcoming') {
+            $query->where('start_date', '>', now());
+        }
+        
+        $trainings = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Trainings fetched successfully',
+            'data' => $trainings,
+            'stats'=>[
+                'students'=>120,
+                'instructors'=>34,
+                'approval'=>8,
+            ]
+        ]);
+    }
+
+    public function fromName(Request $request)
+    {
+        $training = Training::where('title', 'like', '%'.$request->title.'%')->with('pricing', 'media', 'modules.trainer')->first();
+        return response()->json([
+            'success' => true,
+            'message' => 'Training fetched successfully',
+            'data' => $training
+        ]);
+    }
+
+    public function related(Request $request)
+    {
+        $training = Training::where('title', 'like', '%'.$request->title.'%')->get(['id', 'title', 'category'])->first();
+        logger($training);
+        $categories = json_decode($training['category']);
+        logger($categories);
+        $trainings = Training::whereIn('category', $categories)->with('pricing', 'media', 'modules.trainer')->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'Training fetched successfully',
+            'data' => $trainings
+        ]);
+    }
+    
     public function user(Request $request)
     {
         $training = [

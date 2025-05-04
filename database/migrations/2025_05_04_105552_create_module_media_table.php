@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('module_media', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('training_id')->constrained('trainings');
-            $table->foreignId('module_id')->constrained('modules');
+            $table->foreignId('training_id')->constrained('trainings')->onDelete('cascade');
+            $table->foreignId('module_id')->constrained('modules')->onDelete('cascade');
             $table->string('url');
         });
     }
