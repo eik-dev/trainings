@@ -2,16 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Media extends Model
+class ModuleMedia extends Model
 {
-    use HasFactory;
-
+    //
     protected $fillable = [
         'training_id',
-        'type',
+        'module_id',
         'url',
     ];
 }

@@ -14,13 +14,14 @@ class TrainerController extends Controller
 
     public function create(Request $request)
     {
-        $trainer = Trainer::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-            'phone' => $request->phone,
-            'address' => $request->address,
+        foreach ($request->trainers as $trainer) {
+            Trainer::create([
+                'name' => $trainer['name'],
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Trainer created successfully',
         ]);
-        return response()->json($trainer);
     }
 }

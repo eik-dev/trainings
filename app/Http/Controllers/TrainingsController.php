@@ -3,27 +3,137 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\progress;
-use App\Models\training;
-use App\Models\purchase;
-
+use App\Models\Training;
+use App\Models\Price;
+use App\Models\Media;
+use App\Models\Module;
+use App\Models\ModuleMedia;
 class TrainingsController extends Controller
 {
     public function index(Request $request)
     {
         return response()->json(['message' => 'All Trainings']);
     }
+
+    public function draft(Request $request)
+    {
+        $trainings = Training::where('draft', true)->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'Draft trainings fetched successfully',
+            'data' => $trainings
+        ]);
+    }
+
     public function create(Request $request)
     {
         $training = Training::create([
             'title' => $request->title,
             'description' => $request->description,
             'category' => $request->category,
-            'price' => $request->price,
-            'image' => $request->image,
+            'reference_id' => $request->reference_id,
+            'start_date' => $request->start,
+            'end_date' => $request->end,
         ]);
-        return response()->json($training);
+        return response()->json([
+            'success' => true,
+            'message' => 'Training created successfully',
+            'data' => $training
+        ]);
     }
+
+    public function pricing(Request $request)
+    {
+        logger($request->all());
+        if (isset($request->membersPrice)) {
+            Price::create([
+                'training_id' => $request->training_id,
+                'type' => 'members',
+                'price' => $request->membersPrice,
+            ]);
+        }
+        
+        if (isset($request->nonMembersPrice)) {
+            Price::create([
+                'training_id' => $request->training_id,
+                'type' => 'non-members',
+                'price' => $request->nonMembersPrice,
+            ]);
+        }
+        
+        if (isset($request->studentPrice)) {
+            Price::create([
+                'training_id' => $request->training_id,
+                'type' => 'student',
+                'price' => $request->studentPrice,
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Pricing created successfully',
+        ]);
+    }
+
+    public function media(Request $request)
+    {
+        $file = $request->file('file');
+        $destinationPath = public_path("uploads/trainings/$request->training_id/$request->type");
+        $name = $file->getClientOriginalName();
+        $file->move($destinationPath, str_replace(' ', '_', $name));
+        $url = url("uploads/trainings/$request->training_id/$request->type/" . str_replace(' ', '_', $name));
+
+        Media::create([
+            'training_id' => $request->training_id,
+            'type' => $request->type,
+            'url' => $url,
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Media created successfully',
+        ]);
+    }
+
+    public function modules(Request $request)
+    {
+        $module = Module::create([
+            'training_id' => $request->training_id,
+            'trainer_id' => $request->trainer_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'type' => $request->type,
+            'url' => $request->url,
+            'status' => $request->status,
+            'time' => $request->time,
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Module created successfully',
+            'data' => $module
+        ]);
+    }
+
+    public function moduleMedia(Request $request)
+    {
+        $file = $request->file('file');
+        $destinationPath = public_path("uploads/trainings/modules/$request->module_id");
+        $name = $file->getClientOriginalName();
+        $file->move($destinationPath, str_replace(' ', '_', $name));
+        $url = url("uploads/trainings/modules/$request->module_id/" . str_replace(' ', '_', $name));
+        logger($url);
+
+        ModuleMedia::create([
+            'training_id' => $request->training_id,
+            'module_id' => $request->module_id,
+            'url' => $url,
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Media created successfully',
+        ]);
+    }
+
     public function calendar(Request $request)
     {
         $training = [
@@ -49,23 +159,13 @@ class TrainingsController extends Controller
         ];
         return response()->json($data);
     }
-    public function training(Request $request)
+    public function training(Training $training)
     {
-        $session =[
-            'name'=>'Lorem ipsum deor',
-            'url'=>'https://www.youtube.com/embed/jCZ9KcSr1NM?list=PLeAdgxgTgf96XOFiZDo0V8X0Ud7NO8zUs',
-        ];
-        $data = [
-            'trainer'=>'Jane Doe',
-            'rating'=>4.5,
-            'reviews'=>38,
-            'sessions'=>array_fill(0, 12, $session),
-            'progress'=>[
-                'session'=>4,
-                'timestamp'=>0
-            ]
-        ];
-        return response()->json($data);
+        return response()->json([
+            'success' => true,
+            'message' => 'Training fetched successfully',
+            'data' => $training
+        ]);
     }
     public function info(Request $request)
     {

@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('title');
             $table->json('category')->nullable();
             $table->longText('description')->nullable();
+            $table->boolean('draft')->default(true);
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('location')->nullable();
         });
     }
 

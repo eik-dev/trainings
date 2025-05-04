@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class training extends Model
+class Training extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name',
+        'reference_id',
+        'title',
         'category',//json{[TWGs]}
         'description',
         'draft',//status; null inactive, false active, true draft
-        'rating',
-        'reviews',
-        'trainers',//json{[names]}
+        'start_date',
+        'end_date',
+        'location',
     ];
 }
